@@ -16,7 +16,7 @@ if __name__ == "__main__":
     while choice != 'q':
         print("\n[1] Enter 1 to initialize SipderOne and donwload data.")
         print("[2] Enter 2 test data")
-        #print("[3] Enter 2 test data")
+        print("[3] Enter 3 to compare speed of two airplanes")
         print("[q] Enter q to quit.")
 
         choice = input("\nWhat would you like to do? ")
@@ -31,8 +31,9 @@ if __name__ == "__main__":
             extract(airplane_name)
 
         elif choice == '3':
-            print(fuzz.ratio("Boeing 747 200", "Boeing_747-200"))
-
+            first_airplane_name = input("Please enter first Airplane name:")
+            second_airplane_name = input("Please enter second Airplane name:")
+            compare_airplanes(first_airplane_name, second_airplane_name)
 
             pass
         elif choice == 'q':
@@ -42,5 +43,3 @@ if __name__ == "__main__":
 
     # Print a message that we are all finished.
     print("Thanks again, bye now.")
-
-
