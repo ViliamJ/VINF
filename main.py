@@ -1,3 +1,6 @@
+import csv
+import time
+
 import scrapy
 from scrapy.crawler import CrawlerProcess
 
@@ -17,6 +20,7 @@ if __name__ == "__main__":
         print("\n[1] Enter 1 to initialize SipderOne and donwload data.")
         print("[2] Enter 2 test data")
         print("[3] Enter 3 to compare speed of two airplanes")
+        print("[4] Enter 4 to extract data from every file to .csv")
         print("[q] Enter q to quit.")
 
         choice = input("\nWhat would you like to do? ")
@@ -28,14 +32,55 @@ if __name__ == "__main__":
 
         elif choice == '2':
             airplane_name = input("Please enter airplane name:")
-            extract(airplane_name)
+            data = smart_extract(airplane_name)
+            print(data)
 
         elif choice == '3':
             first_airplane_name = input("Please enter first Airplane name:")
             second_airplane_name = input("Please enter second Airplane name:")
             compare_airplanes(first_airplane_name, second_airplane_name)
 
-            pass
+
+        elif choice == '4':
+
+            rootdir = "data/"
+            start_time = time.time()
+
+            for root, dirs, files in os.walk(rootdir):
+                for file in files:
+                    data_dict = single_extract(file)
+                    if data_dict["error"] != 1:
+                        csv_file = open("result.csv", "a", encoding="UTF-8")
+
+                        for key in data_dict.keys():
+                            csv_file.write("%s,%s" % (key, data_dict[key]))
+
+                        csv_file.close()
+            print("--- %s seconds ---" % (time.time() - start_time))
+
+        elif choice == '5':
+            rootdir = "data/"
+
+            #ray.init(address='auto', _node_ip_address='192.168.1.18')
+            ray.init(address="ray://192.168.1.27:10001")
+            start_time = time.time()
+
+            futures = [ray_extract.remote(file) for file in os.listdir("data/")]
+            data = ray.get(futures)
+
+            ray_csv_file = open("result_ray.csv", "a", encoding="UTF-8")
+            for item in data:
+                ray_csv_file.write("%s\n" % item)
+
+            ray_csv_file.close()
+            ray.shutdown()
+
+            print("--- %s seconds ---" % (time.time() - start_time))
+
+
+
+
+
         elif choice == 'q':
             pass
         else:

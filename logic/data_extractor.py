@@ -1,11 +1,124 @@
 import os
 import re
 
+import ray
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 
 
-def extract(input_airplane_name):
+
+def single_extract(file):
+    data = {}
+    kmph = 0
+    different_kmph = 0
+
+    # if regex.match(file):
+
+    seareched_file = open(f'data/{file}', "r", encoding="UTF-8")
+
+    opened_file = seareched_file.read()
+
+    # Regular expressions
+    title_regex = re.compile('<title>(.+)<\/title>')
+
+    title = re.findall(title_regex, opened_file)
+    max_speed_regex = re.compile('<li><b>Maximum speed:<\/b> (.*)<\/li>')
+
+    max_speed_answer = re.findall(max_speed_regex, opened_file)
+
+    if max_speed_answer:
+        kmph = re.findall("([0-9]+)&#160;km\/h", max_speed_answer[0])
+        mph = re.findall("([0-9]+)&#160;mph", max_speed_answer[0])
+
+    if not max_speed_answer:
+        new_max_speed = re.findall(r"max. (.+)km\/h", opened_file)
+        if new_max_speed:
+            if "&#160;" in new_max_speed[0]:
+                striped_max_speed = new_max_speed[0].replace("&#160;", "")
+
+                different_kmph = striped_max_speed
+
+    if kmph != 0 and kmph != []:
+        data = {
+            "airplane_title": title,
+            "max_speed_kmph": max(kmph),
+            "error": 0
+        }
+
+    elif different_kmph != 0:
+        data = {
+            "airplane_title": title,
+            "max_speed_kmph": different_kmph,
+            "error": 0
+        }
+    else:
+        data = {
+            "airplane_title": title,
+            "error": 1
+        }
+
+    seareched_file.close()
+
+    return data
+
+@ray.remote
+def ray_extract(file):
+    data = {}
+    kmph = 0
+    different_kmph = 0
+
+    # if regex.match(file):
+
+    seareched_file = open(f'data/{file}', "r", encoding="UTF-8")
+
+    opened_file = seareched_file.read()
+
+    # Regular expressions
+    title_regex = re.compile('<title>(.+)<\/title>')
+
+    title = re.findall(title_regex, opened_file)
+    max_speed_regex = re.compile('<li><b>Maximum speed:<\/b> (.*)<\/li>')
+
+    max_speed_answer = re.findall(max_speed_regex, opened_file)
+
+    if max_speed_answer:
+        kmph = re.findall("([0-9]+)&#160;km\/h", max_speed_answer[0])
+        mph = re.findall("([0-9]+)&#160;mph", max_speed_answer[0])
+
+    if not max_speed_answer:
+        new_max_speed = re.findall(r"max. (.+)km\/h", opened_file)
+        if new_max_speed:
+            if "&#160;" in new_max_speed[0]:
+                striped_max_speed = new_max_speed[0].replace("&#160;", "")
+
+                different_kmph = striped_max_speed
+
+    if kmph != 0 and kmph != []:
+        data = {
+            "airplane_title": title,
+            "max_speed_kmph": max(kmph),
+            "error": 0
+        }
+
+    elif different_kmph != 0:
+        data = {
+            "airplane_title": title,
+            "max_speed_kmph": different_kmph,
+            "error": 0
+        }
+    else:
+        data = {
+            "airplane_title": title,
+            "error": 1
+        }
+
+    seareched_file.close()
+
+    return data
+
+
+
+def smart_extract(input_airplane_name):
     data = {}
     kmph = 0
     different_kmph = 0
@@ -43,7 +156,9 @@ def extract(input_airplane_name):
     max_speed_answer = re.findall(max_speed_regex, opened_file)
 
     if max_speed_answer:
+        print(max_speed_answer)
         kmph = re.findall("([0-9]+)&#160;km\/h", max_speed_answer[0])
+
         mph = re.findall("([0-9]+)&#160;mph", max_speed_answer[0])
 
     if not max_speed_answer:
@@ -54,7 +169,7 @@ def extract(input_airplane_name):
 
                 different_kmph = striped_max_speed
 
-    if kmph != 0:
+    if kmph != 0 and kmph != []:
         data = {
             "airplane_title": title,
             "max_speed_kmph": max(kmph),
@@ -73,12 +188,13 @@ def extract(input_airplane_name):
             "error": 1
         }
 
+    seareched_file.close()
     return data
 
 
 def compare_airplanes(airplane_1, airplane_2):
-    a1_data = extract(airplane_1)
-    a2_data = extract(airplane_2)
+    a1_data = smart_extract(airplane_1)
+    a2_data = smart_extract(airplane_2)
 
     a1_title = a1_data["airplane_title"]
     a2_title = a2_data["airplane_title"]
