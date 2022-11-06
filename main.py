@@ -12,14 +12,6 @@ from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 
 
-@ray.remote
-def search_through_files(file_list):
-    dataset = []
-
-    for file in file_list:
-        dataset.append(single_extract(file))
-
-    return dataset
 
 
 if __name__ == "__main__":

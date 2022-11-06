@@ -6,7 +6,6 @@ from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 
 
-
 def single_extract(file):
     data = {}
     kmph = 0
@@ -63,6 +62,7 @@ def single_extract(file):
     seareched_file.close()
 
     return data
+
 
 @ray.remote
 def ray_extract(file):
@@ -121,7 +121,6 @@ def ray_extract(file):
     seareched_file.close()
 
     return data
-
 
 
 def smart_extract(input_airplane_name):
@@ -247,3 +246,13 @@ def compare_airplanes(airplane_1, airplane_2):
             print(f"Airplaine 2 speed: {a2_speed} km/h")
 
             print("Wow ? Max air speeds are identical.")
+
+
+@ray.remote
+def search_through_files(file_list):
+    dataset = []
+
+    for file in file_list:
+        dataset.append(single_extract(file))
+
+    return dataset
