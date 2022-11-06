@@ -1,6 +1,7 @@
 import csv
 import time
 
+import ray
 import scrapy
 from scrapy.crawler import CrawlerProcess
 
@@ -9,6 +10,17 @@ from vinf_airplanes.vinf_airplanes.spiders.spider_one import SpiderOne
 
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
+
+
+@ray.remote
+def search_through_files(file_list):
+    dataset = []
+
+    for file in file_list:
+        dataset.append(single_extract(file))
+
+    return dataset
+
 
 if __name__ == "__main__":
 
@@ -48,6 +60,7 @@ if __name__ == "__main__":
 
             for root, dirs, files in os.walk(rootdir):
                 for file in files:
+                    print(file)
                     data_dict = single_extract(file)
                     if data_dict["error"] != 1:
                         csv_file = open("result.csv", "a", encoding="UTF-8")
@@ -61,8 +74,8 @@ if __name__ == "__main__":
         elif choice == '5':
             rootdir = "data/"
 
-            #ray.init(address='auto', _node_ip_address='192.168.1.18')
-            ray.init(address="ray://192.168.1.27:10001")
+            ray.init(address='auto', _node_ip_address='192.168.1.18')
+            # ray.init(address="ray://192.168.1.27:10001")
             start_time = time.time()
 
             futures = [ray_extract.remote(file) for file in os.listdir("data/")]
@@ -77,10 +90,50 @@ if __name__ == "__main__":
 
             print("--- %s seconds ---" % (time.time() - start_time))
 
+        elif choice == '6':
+            rootdir = "data/"
+
+            ray.init(address='auto', _node_ip_address='192.168.1.18')
+
+            # ray.init(address="ray://192.168.1.27:10001")
+            start_time = time.time()
+
+            file_list = []
+            for file in os.listdir("data/"):
+                file_list.append(file)
+
+            file_list_first_half = file_list[:len(file_list) // 2]
+            file_list_second_half = file_list[len(file_list) // 2:]
+
+            chunk_size = int(input("Input number of Cores:"))
+            chunked_list = [file_list[i:i + chunk_size] for i in range(0, len(file_list), chunk_size)]
 
 
 
+            # data = ray.get(test.remote(file_list))
 
+            ray_functions_ids = []
+
+            # result_ids.append(search_through_files.remote(file_list_first_half))
+            # result_ids.append(search_through_files.remote(file_list_second_half))
+
+            for list_chunk in chunked_list:
+                ray_functions_ids.append(search_through_files.remote(list_chunk))
+
+            print("something is happening")
+            # Wait for the tasks to complete and retrieve the results.
+            # With at least 4 cores, this will take 1 second.
+            data = ray.get(ray_functions_ids)
+            print("something is happening again")
+
+            ray_csv_file = open("result_ray_test.csv", "a", encoding="UTF-8")
+            for item in data:
+                ray_csv_file.write("%s\n" % item)
+
+            ray_csv_file.close()
+            ray.shutdown()
+
+            print("--- %s seconds ---" % (time.time() - start_time))
         elif choice == 'q':
             pass
         else:

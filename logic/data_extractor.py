@@ -40,6 +40,7 @@ def single_extract(file):
 
     if kmph != 0 and kmph != []:
         data = {
+            "File_name": file,
             "airplane_title": title,
             "max_speed_kmph": max(kmph),
             "error": 0
@@ -47,12 +48,14 @@ def single_extract(file):
 
     elif different_kmph != 0:
         data = {
+            "File_name": file,
             "airplane_title": title,
             "max_speed_kmph": different_kmph,
             "error": 0
         }
     else:
         data = {
+            "File_name": file,
             "airplane_title": title,
             "error": 1
         }
@@ -95,6 +98,7 @@ def ray_extract(file):
 
     if kmph != 0 and kmph != []:
         data = {
+            "File_name": file,
             "airplane_title": title,
             "max_speed_kmph": max(kmph),
             "error": 0
@@ -102,12 +106,14 @@ def ray_extract(file):
 
     elif different_kmph != 0:
         data = {
+            "File_name": file,
             "airplane_title": title,
             "max_speed_kmph": different_kmph,
             "error": 0
         }
     else:
         data = {
+            "File_name": file,
             "airplane_title": title,
             "error": 1
         }
@@ -171,6 +177,7 @@ def smart_extract(input_airplane_name):
 
     if kmph != 0 and kmph != []:
         data = {
+            "File_name": max_file,
             "airplane_title": title,
             "max_speed_kmph": max(kmph),
             "error": 0
@@ -178,12 +185,14 @@ def smart_extract(input_airplane_name):
 
     elif different_kmph != 0:
         data = {
+            "File_name": max_file,
             "airplane_title": title,
             "max_speed_kmph": different_kmph,
             "error": 0
         }
     else:
         data = {
+            "File_name": max_file,
             "airplane_title": title,
             "error": 1
         }
