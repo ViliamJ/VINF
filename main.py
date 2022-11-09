@@ -11,9 +11,6 @@ from vinf_airplanes.vinf_airplanes.spiders.spider_one import SpiderOne
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 
-
-
-
 if __name__ == "__main__":
 
     print("\nWelcome to the nature center. What would you like to do?")
@@ -25,6 +22,7 @@ if __name__ == "__main__":
         print("[2] Enter 2 test data")
         print("[3] Enter 3 to compare speed of two airplanes")
         print("[4] Enter 4 to extract data from every file to .csv")
+        print("[6] Enter 6 to extract data from every file to .csv with RAY cluster")
         print("[q] Enter q to quit.")
 
         choice = input("\nWhat would you like to do? ")
@@ -50,44 +48,48 @@ if __name__ == "__main__":
             rootdir = "data/"
             start_time = time.time()
 
+            csv_file = open("result_sequential.csv", "a", encoding="UTF-8")
+
             for root, dirs, files in os.walk(rootdir):
                 for file in files:
-                    print(file)
+                    # print(file)
                     data_dict = single_extract(file)
-                    if data_dict["error"] != 1:
-                        csv_file = open("result.csv", "a", encoding="UTF-8")
+                    # if data_dict["error"] != 1:
+                    csv_file.write("%s\n" % data_dict)
 
-                        for key in data_dict.keys():
-                            csv_file.write("%s,%s" % (key, data_dict[key]))
-
-                        csv_file.close()
+            csv_file.close()
             print("--- %s seconds ---" % (time.time() - start_time))
 
-        elif choice == '5':
-            rootdir = "data/"
 
-            ray.init(address='auto', _node_ip_address='192.168.1.18')
-            # ray.init(address="ray://192.168.1.27:10001")
-            start_time = time.time()
 
-            futures = [ray_extract.remote(file) for file in os.listdir("data/")]
-            data = ray.get(futures)
 
-            ray_csv_file = open("result_ray.csv", "a", encoding="UTF-8")
-            for item in data:
-                ray_csv_file.write("%s\n" % item)
-
-            ray_csv_file.close()
-            ray.shutdown()
-
-            print("--- %s seconds ---" % (time.time() - start_time))
+        # elif choice == '5':
+        #    rootdir = "data/"
+        #
+        #    ray.init(address='auto', _node_ip_address='192.168.1.18')
+        #    # ray.init(address="ray://192.168.1.27:10001")
+        #    start_time = time.time()
+        #
+        #    futures = [ray_extract.remote(file) for file in os.listdir("data/")]
+        #    data = ray.get(futures)
+        #
+        #    ray_csv_file = open("result_ray.csv", "a", encoding="UTF-8")
+        #    for item in data:
+        #        ray_csv_file.write("%s\n" % item)
+        #
+        #    ray_csv_file.close()
+        #    ray.shutdown()
+        #
+        #    print("--- %s seconds ---" % (time.time() - start_time))
 
         elif choice == '6':
             rootdir = "data/"
 
-            ray.init(address='auto', _node_ip_address='192.168.1.18')
+            runtime_env = {"working_dir": "./", "excludes": ["/data/"]}
+            ray.init(address='auto', _node_ip_address='192.168.1.18', runtime_env=runtime_env)
 
             # ray.init(address="ray://192.168.1.27:10001")
+            chunk_size = int(input("Input number of Cores:"))
             start_time = time.time()
 
             file_list = []
@@ -97,12 +99,7 @@ if __name__ == "__main__":
             file_list_first_half = file_list[:len(file_list) // 2]
             file_list_second_half = file_list[len(file_list) // 2:]
 
-            chunk_size = int(input("Input number of Cores:"))
             chunked_list = [file_list[i:i + chunk_size] for i in range(0, len(file_list), chunk_size)]
-
-
-
-            # data = ray.get(test.remote(file_list))
 
             ray_functions_ids = []
 
@@ -118,7 +115,7 @@ if __name__ == "__main__":
             data = ray.get(ray_functions_ids)
             print("something is happening again")
 
-            ray_csv_file = open("result_ray_test.csv", "a", encoding="UTF-8")
+            ray_csv_file = open("result_ray.csv", "a", encoding="UTF-8")
             for item in data:
                 ray_csv_file.write("%s\n" % item)
 
