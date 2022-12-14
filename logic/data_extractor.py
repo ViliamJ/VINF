@@ -76,7 +76,7 @@ def single_extract(file):
 
     range_km_regex = re.findall("<b>Range:<\/b>(.+?)(?=&#160;)", opened_file)
 
-    print(type(range_km_regex), range_km_regex)
+
 
     if range_km_regex:
         range_km_regex[0] = range_km_regex[0].strip()
@@ -94,6 +94,8 @@ def single_extract(file):
 
     else:
         data["range_km"] = None
+
+    #print(data)
 
     return data
 

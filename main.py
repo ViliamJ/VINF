@@ -50,7 +50,7 @@ if __name__ == "__main__":
 
         elif choice == '4':
 
-            rootdir = "data2/"
+            rootdir = "data/"
             start_time = time.time()
 
             csv_file = open("final_result_sequential.csv", "w", encoding="UTF-8")
@@ -63,7 +63,6 @@ if __name__ == "__main__":
                     print(file)
 
                     data_dict = single_extract(file)
-                    print(data_dict)
 
                     writer.writerows([data_dict])
 
@@ -73,27 +72,6 @@ if __name__ == "__main__":
             csv_file.close()
             print("--- %s seconds ---" % (time.time() - start_time))
 
-
-
-
-        # elif choice == '5':
-        #    rootdir = "data/"
-        #
-        #    ray.init(address='auto', _node_ip_address='192.168.1.18')
-        #    # ray.init(address="ray://192.168.1.27:10001")
-        #    start_time = time.time()
-        #
-        #    futures = [ray_extract.remote(file) for file in os.listdir("data/")]
-        #    data = ray.get(futures)
-        #
-        #    ray_csv_file = open("result_ray.csv", "a", encoding="UTF-8")
-        #    for item in data:
-        #        ray_csv_file.write("%s\n" % item)
-        #
-        #    ray_csv_file.close()
-        #    ray.shutdown()
-        #
-        #    print("--- %s seconds ---" % (time.time() - start_time))
 
         elif choice == '6':
             rootdir = "data/"
@@ -131,8 +109,8 @@ if __name__ == "__main__":
 
             # ray_csv_file = open("result_ray.csv", "a", encoding="UTF-8")
 
-            ray_csv_file = open("final_result_ray.csv", "a", encoding="UTF-8")
-            field_names = ['File_name', 'airplane_title', 'max_speed_kmph', 'error']
+            ray_csv_file = open("final_result_ray.csv", "w", encoding="UTF-8")
+            field_names = ['File_name', 'airplane_title', 'max_speed_kmph', 'error', 'range_km']
             writer = csv.DictWriter(ray_csv_file, fieldnames=field_names)
             writer.writeheader()
 
