@@ -35,7 +35,7 @@ class TestDataframeCSV(unittest.TestCase):
         """ensures there is no unexpected data in columns"""
         print(self.df.dtypes)
 
-        assert self.df.dtypes['max_speed_kmph'] == int, "should be int"
+        assert self.df.dtypes['max_speed_kmph'] == float, "should be int"
 
 
 

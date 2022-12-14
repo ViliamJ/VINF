@@ -27,6 +27,7 @@ if __name__ == "__main__":
         print("[3] Enter 3 to compare speed of two airplanes")
         print("[4] Enter 4 to extract data from every file to .csv")
         print("[6] Enter 6 to extract data from every file to .csv with RAY cluster")
+        print("[7] Enter 7 to SPARK search from .CSV file")
         print("[q] Enter q to quit.")
 
         choice = input("\nWhat would you like to do? ")
@@ -111,6 +112,7 @@ if __name__ == "__main__":
             # file_list_first_half = file_list[:len(file_list) // 2]
             # file_list_second_half = file_list[len(file_list) // 2:]
 
+            # Rozloženie listu súborov na viaceré rovnako veľké listy (napr. 1 na 2 listy)
             chunked_list = [file_list[i:i + chunk_size] for i in range(0, len(file_list), chunk_size)]
 
             ray_functions_ids = []
@@ -163,12 +165,16 @@ if __name__ == "__main__":
                     df_spark.filter(df_spark.File_name == f"{searched_item}").show()
                 elif column == "airplane_title":
                     searched_item = input("Input searched item:")
+                    df_list_column_airplane_title = [data[0] for data in df_spark.select('range_km').collect()]
+                    searched_item_fuzzy = fuzzy_name_function(df_list_column_airplane_title, searched_item)
 
-                    df_spark.filter(df_spark.range_km == f"{searched_item}").show()
+                    df_spark.filter(df_spark.airplane_title == f"{searched_item_fuzzy}").show()
                 elif column == "max_speed_kmph":
                     searched_item = input("Input searched item:")
+                    df_list_column_max_speed_kmph = [data[0] for data in df_spark.select('range_km').collect()]
+                    searched_item_fuzzy = fuzzy_name_function(df_list_column_max_speed_kmph, searched_item)
 
-                    df_spark.filter(df_spark.range_km == f"{searched_item}").show()
+                    df_spark.filter(df_spark.max_speed_kmph == f"{searched_item_fuzzy}").show()
                 elif column == "range_km":
                     searched_item = input("Input searched item:")
 
@@ -177,16 +183,7 @@ if __name__ == "__main__":
 
                     df_spark.filter(df_spark.range_km == f"{searched_item_fuzzy}").show()
 
-                choice2 = input("would you like to find another ?:")
-
-
-
-
-
-
-
-
-
+                choice2 = input("would you like to find another, q to stop ?:")
 
         elif choice == 'q':
             pass

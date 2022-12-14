@@ -12,7 +12,7 @@ class SpiderOne(scrapy.Spider):
     name = "sp1"
     counter = 0
     linkextractor = LinkExtractor(allow=('https://en.wikipedia.org/wiki/(.)'))
-
+    # Nastavenie na BFS algoritmus
     custom_settings = {
         'DEPTH_PRIORITY': '1',
         'SCHEDULER_DISK_QUEUE': 'scrapy.squeues.PickleFifoDiskQueue',
