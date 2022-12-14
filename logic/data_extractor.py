@@ -6,6 +6,17 @@ from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 
 
+def fuzzy_name_function(input_list, searched_item):
+    ratio_list = []
+    for range_km in input_list:
+        range_ratio = fuzz.ratio(range_km, searched_item)
+        range_tuple = (range_km, range_ratio)
+        ratio_list.append(range_tuple)
+
+    range_km_name = max(ratio_list, key=lambda tup: tup[1])
+
+    return range_km_name[0]
+
 def single_extract(file):
     data = {}
     kmph = 0
@@ -61,68 +72,33 @@ def single_extract(file):
 
     seareched_file.close()
 
-    return data
+    # Časť pre ziskavanie vzdialenosti RANGE v km
 
+    range_km_regex = re.findall("<b>Range:<\/b>(.+?)(?=&#160;)", opened_file)
 
-@ray.remote
-def ray_extract(file):
-    data = {}
-    kmph = 0
-    different_kmph = 0
+    print(type(range_km_regex), range_km_regex)
 
-    # if regex.match(file):
+    if range_km_regex:
+        range_km_regex[0] = range_km_regex[0].strip()
+        range_km_regex[0] = range_km_regex[0].replace(",", "")
+        data["range_km"] = range_km_regex[0]
+    elif not range_km_regex:
+        range_km_regex = re.findall("([0-9]*,[0-9]*)&#160;km", opened_file)
 
-    seareched_file = open(f'data/{file}', "r", encoding="UTF-8")
+        if range_km_regex != []:
+            for i, item in enumerate(range_km_regex):
+                range_km_regex[i] = range_km_regex[i].replace(",", "")
+            max_range = max(range_km_regex)
 
-    opened_file = seareched_file.read()
+            data["range_km"] = max_range
 
-    # Regular expressions
-    title_regex = re.compile('<title>(.+)<\/title>')
-
-    title = re.findall(title_regex, opened_file)
-    max_speed_regex = re.compile('<li><b>Maximum speed:<\/b> (.*)<\/li>')
-
-    max_speed_answer = re.findall(max_speed_regex, opened_file)
-
-    if max_speed_answer:
-        kmph = re.findall("([0-9]+)&#160;km\/h", max_speed_answer[0])
-        mph = re.findall("([0-9]+)&#160;mph", max_speed_answer[0])
-
-    if not max_speed_answer:
-        new_max_speed = re.findall(r"max. (.+)km\/h", opened_file)
-        if new_max_speed:
-            if "&#160;" in new_max_speed[0]:
-                striped_max_speed = new_max_speed[0].replace("&#160;", "")
-
-                different_kmph = striped_max_speed
-
-    if kmph != 0 and kmph != []:
-        data = {
-            "File_name": file,
-            "airplane_title": title,
-            "max_speed_kmph": max(kmph),
-            "error": 0
-        }
-
-    elif different_kmph != 0:
-        data = {
-            "File_name": file,
-            "airplane_title": title,
-            "max_speed_kmph": different_kmph,
-            "error": 0
-        }
     else:
-        data = {
-            "File_name": file,
-            "airplane_title": title,
-            "error": 1
-        }
-
-    seareched_file.close()
+        data["range_km"] = None
 
     return data
 
 
+# Tato fukncia sluzila povodne na porovnanie rychlosti medzi dvomi lietadlami, este na zaciatku semestra pred distribuovanym spracovanim
 def smart_extract(input_airplane_name):
     data = {}
     kmph = 0
