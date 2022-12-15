@@ -38,5 +38,4 @@ class TestDataframeCSV(unittest.TestCase):
         assert self.df.dtypes['max_speed_kmph'] == float, "should be int"
 
 
-
 unittest.main()

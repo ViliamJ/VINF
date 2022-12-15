@@ -33,6 +33,19 @@ class SpiderOne(scrapy.Spider):
             yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response, i=0):
+        """
+                This function is used in Scrapy Crawling mechanism. It defines what to do or find next links
+                via LinkExtractor() function. This function downloads web pages from crawled URLs.
+
+                @:type  page: string
+                @:param page: name of the page / url it got
+                @:type  link: string
+                @:param link: url link for next page to be crawled
+                @:type links: list
+                @:param links: list of links
+        """
+
+
         page = response.url.split("/")[-1]
         filename = f'{self.counter}-{page}.html'
 
@@ -47,7 +60,6 @@ class SpiderOne(scrapy.Spider):
         link = LinkExtractor(allow='https://en.wikipedia.org/wiki/(.)',
                              restrict_css='#mw-content-text > div.mw-parser-output')
         links = link.extract_links(response)
-        #print(links)
 
         #if self.counter == 500:
             #raise CloseSpider('Reached limit 500')
